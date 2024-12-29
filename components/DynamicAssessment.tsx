@@ -3,6 +3,7 @@ import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Loader2 } from 'lucide-react';
+import { UserInfo } from './UserAssessmentForm';
 
 // Expanded fallback questions
 interface Question {
@@ -149,13 +150,14 @@ const fallbackQuestions: Question[] = [
   }
 ];
 
-async function generateQuestions(): Promise<Question[]> {
+async function generateQuestions(userInfo: UserInfo): Promise<Question[]> {
   try {
     const response = await fetch('/api/generate', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
+      body: JSON.stringify({ userInfo }),
     });
 
     if (!response.ok) {
@@ -178,7 +180,11 @@ async function generateQuestions(): Promise<Question[]> {
   }
 }
 
-const DynamicAssessment: React.FC = () => {
+interface DynamicAssessmentProps {
+  userInfo: UserInfo;
+}
+
+const DynamicAssessment: React.FC<DynamicAssessmentProps> = ({ userInfo }) => {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentStep, setCurrentStep] = useState<number>(0);
   const [answers, setAnswers] = useState<Answers>({});
@@ -193,7 +199,7 @@ const DynamicAssessment: React.FC = () => {
   const loadQuestions = async (): Promise<void> => {
     setLoading(true);
     try {
-      const generatedQuestions = await generateQuestions();
+      const generatedQuestions = await generateQuestions(userInfo);
       setQuestions(generatedQuestions);
     } catch (error) {
       console.error("Error loading questions:", error);
