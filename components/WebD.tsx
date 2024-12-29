@@ -400,9 +400,16 @@ import React from 'react'
 import DynamicAssessment from './DynamicAssessment'
 
 const WebD = () => {
+  const userInfo = {
+    experienceLevel: 'beginner',
+    techStack: ['JavaScript', 'React'],
+    currentKnowledge: 'basic',
+    learningGoals: 'improve problem-solving skills'
+  };
+
   return (
     <div>
-      <DynamicAssessment  />
+      <DynamicAssessment userInfo={userInfo} />
     </div>
   )
 }
