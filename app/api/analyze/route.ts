@@ -36,9 +36,9 @@ export async function POST(req: Request) {
       const response = await result.response;
       const text = response.text();
 
-      // Clean and validate the JSON
+      // Clean and validate the JSON,
       const cleanText = text
-        .replace(/```json\s*|\s*```/g, '') // Remove markdown code blocks
+        .replace(/```json\s*|\s*```/g, '') // Remove
         .replace(/[\u0000-\u001F]+/g, ' ') // Remove control characters
         .trim();
 
