@@ -151,33 +151,43 @@ const fallbackQuestions: Question[] = [
 ];
 
 async function generateQuestions(userInfo: UserInfo): Promise<Question[]> {
-  try {
-    const response = await fetch('/api/generate', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ userInfo }),
-    });
+  const maxRetries = 3;
+  let attempts = 0;
 
-    if (!response.ok) {
-      throw new Error('Failed to generate questions');
+  while (attempts < maxRetries) {
+    try {
+      const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userInfo }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate questions');
+      }
+
+      const data = await response.json();
+      
+      if (data.error || !data.questions) {
+        throw new Error(data.error || 'Invalid response format');
+      }
+
+      return data.questions.map((q: Question, index: number) => ({
+        ...q,
+        id: index + 1
+      }));
+    } catch (error) {
+      console.error(`Attempt ${attempts + 1} failed:`, error);
+      attempts += 1;
+      if (attempts >= maxRetries) {
+        return fallbackQuestions;
+      }
     }
-
-    const data = await response.json();
-    
-    if (data.error || !data.questions) {
-      throw new Error(data.error || 'Invalid response format');
-    }
-
-    return data.questions.map((q: Question, index: number) => ({
-      ...q,
-      id: index + 1
-    }));
-  } catch (error) {
-    console.error("Error generating questions:", error);
-    return fallbackQuestions;
   }
+
+  return fallbackQuestions;
 }
 
 interface DynamicAssessmentProps {
