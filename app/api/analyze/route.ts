@@ -5,7 +5,7 @@ const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY || '');
 export async function POST(req: Request) {
   try {
     const { answers, questions } = await req.json();
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
 
     // Create a structured analysis prompt
     const analysisPrompt = `

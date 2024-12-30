@@ -5,9 +5,9 @@ const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY || '');
 export async function POST(req: Request) {
   try {
     const { userInfo } = await req.json();
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
 
-    const prompt = `Generate 10 ${userInfo.experienceLevel} level programming questions focusing on ${userInfo.techStack.join(', ')}. 
+    const prompt = `Generate 30 ${userInfo.experienceLevel} level programming only Multiple choice questions focusing on ${userInfo.techStack.join(', ')}. 
     Consider that the user's current knowledge: ${userInfo.currentKnowledge}
     Their learning goals are: ${userInfo.learningGoals}
 
