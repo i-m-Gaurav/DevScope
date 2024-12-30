@@ -7,7 +7,7 @@ export async function POST(req: Request) {
     const { userInfo } = await req.json();
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
 
-    const prompt = `Generate 30 ${userInfo.experienceLevel} level programming only Multiple choice questions focusing on ${userInfo.techStack.join(', ')}. 
+    const prompt = `Generate 5 ${userInfo.experienceLevel} level programming only Multiple choice questions focusing on ${userInfo.techStack.join(', ')}. 
     Consider that the user's current knowledge: ${userInfo.currentKnowledge}
     Their learning goals are: ${userInfo.learningGoals}
 
