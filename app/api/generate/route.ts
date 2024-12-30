@@ -34,7 +34,7 @@ export async function POST(req: Request) {
     
     // Ensure questions progressively get more challenging and cover different aspects of their tech stack.`;
 
-    const prompt = `Generate 3 ${userInfo.experienceLevel} level programming multiple-choice questions focusing on ${userInfo.techStack.join(', ')}.
+    const prompt = `Generate 15 ${userInfo.experienceLevel} level programming multiple-choice questions focusing on ${userInfo.techStack.join(', ')}.
 Their current knowledge is: ${userInfo.currentKnowledge}.
 Their learning goals are: ${userInfo.learningGoals}.
 
