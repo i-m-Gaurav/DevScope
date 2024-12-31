@@ -32,7 +32,7 @@ export async function POST(req: Request) {
 
     // Ensure questions progressively get more challenging and cover different aspects of their tech stack.`;
 
-    const prompt = `Generate 5 ${
+    const prompt = `Generate 3 ${
       userInfo.experienceLevel
     } level programming multiple-choice questions focusing on ${userInfo.techStack.join(
       ", "
@@ -69,6 +69,8 @@ Only return the JSON output.`;
 
     try {
       const parsedQuestions = JSON.parse(jsonString);
+      console.log("Questions generated:", parsedQuestions);
+
       return Response.json({ questions: parsedQuestions });
     } catch (parseError) {
       console.error("JSON parsing error:", parseError, "Raw text:", jsonString);
