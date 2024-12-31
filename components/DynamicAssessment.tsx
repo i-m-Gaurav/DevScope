@@ -86,7 +86,7 @@ const DynamicAssessment: React.FC<DynamicAssessmentProps> = ({ userInfo }) => {
   const [analyzing, setAnalyzing] = useState(false);
   const [loadingNextQuestion, setLoadingNextQuestion] = useState(false);
 
-  const TOTAL_QUESTIONS = 10;
+  const TOTAL_QUESTIONS = 50;
 
   const loadFirstQuestion = useCallback(async () => {
     setLoading(true);
