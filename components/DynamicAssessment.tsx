@@ -1,17 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Loader2 } from 'lucide-react';
 import { UserInfo } from './UserAssessmentForm';
 
-// Expanded fallback questions
 interface Question {
   id: number;
   question: string;
   options: string[];
   difficulty: string;
   category: string;
+  type: string;
+  subcategory: string;
+  skills_assessed: string[];
 }
 
 interface Answers {
@@ -38,156 +40,37 @@ const fallbackQuestions: Question[] = [
       "To debug code automatically"
     ],
     difficulty: "beginner",
-    category: "fundamentals"
-  },
-  {
-    id: 2,
-    question: "Which data structure would be most efficient for implementing a LIFO (Last In, First Out) pattern?",
-    options: [
-      "Queue",
-      "Stack",
-      "Linked List",
-      "Binary Tree"
-    ],
-    difficulty: "intermediate",
-    category: "data-structures"
-  },
-  {
-    id: 3,
-    question: "What does the 'async' keyword do in JavaScript?",
-    options: [
-      "Makes the function run faster",
-      "Indicates the function returns a Promise",
-      "Stops the function from executing",
-      "Creates a new thread"
-    ],
-    difficulty: "intermediate",
-    category: "javascript"
-  },
-  {
-    id: 4,
-    question: "What is the time complexity of binary search?",
-    options: [
-      "O(n)",
-      "O(log n)",
-      "O(n²)",
-      "O(1)"
-    ],
-    difficulty: "advanced",
-    category: "algorithms"
-  },
-  {
-    id: 5,
-    question: "Which HTML5 tag is used to display a video?",
-    options: [
-      "<media>",
-      "<video>",
-      "<player>",
-      "<film>"
-    ],
-    difficulty: "beginner",
-    category: "web-development"
-  },
-  {
-    id: 6,
-    question: "What is the purpose of CSS Box Model?",
-    options: [
-      "To create 3D boxes in CSS",
-      "To define spacing and borders around elements",
-      "To create popup boxes",
-      "To store CSS variables"
-    ],
-    difficulty: "beginner",
-    category: "web-development"
-  },
-  {
-    id: 7,
-    question: "What is the difference between '==' and '===' in JavaScript?",
-    options: [
-      "No difference, they are the same",
-      "'===' checks both value and type, '==' only checks value",
-      "'==' is deprecated",
-      "'===' is only for numbers"
-    ],
-    difficulty: "intermediate",
-    category: "javascript"
-  },
-  {
-    id: 8,
-    question: "Which SQL command is used to modify existing data in a table?",
-    options: [
-      "MODIFY",
-      "UPDATE",
-      "CHANGE",
-      "ALTER"
-    ],
-    difficulty: "beginner",
-    category: "databases"
-  },
-  {
-    id: 9,
-    question: "What is a REST API?",
-    options: [
-      "A programming language",
-      "An architectural style for APIs",
-      "A database system",
-      "A frontend framework"
-    ],
-    difficulty: "intermediate",
-    category: "web-development"
-  },
-  {
-    id: 10,
-    question: "What is the purpose of dependency injection?",
-    options: [
-      "To inject code into a website",
-      "To reduce coupling between classes",
-      "To speed up code execution",
-      "To compress code files"
-    ],
-    difficulty: "advanced",
-    category: "software-design"
+    category: "version-control",
+    type: "multiple-choice",
+    subcategory: "git",
+    skills_assessed: ["version control", "collaboration"]
   }
+  // Add more fallback questions as needed
 ];
 
-async function generateQuestions(userInfo: UserInfo): Promise<Question[]> {
-  const maxRetries = 3;
-  let attempts = 0;
+async function generateQuestion(userInfo: UserInfo, questionCount: number, previousQuestions: Question[] = []): Promise<{ question: Question; isComplete: boolean }> {
+  try {
+    const response = await fetch('/api/generate', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ 
+        userInfo,
+        questionCount,
+        previousQuestions 
+      }),
+    });
 
-  while (attempts < maxRetries) {
-    try {
-      const response = await fetch('/api/generate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ userInfo }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to generate questions');
-      }
-
-      const data = await response.json();
-      
-      if (data.error || !data.questions) {
-        throw new Error(data.error || 'Invalid response format');
-      }
-
-      return data.questions.map((q: Question, index: number) => ({
-        ...q,
-        id: index + 1
-      }));
-    } catch (error) {
-      console.error(`Attempt ${attempts + 1} failed:`, error);
-      attempts += 1;
-      if (attempts >= maxRetries) {
-        return fallbackQuestions;
-      }
+    if (!response.ok) {
+      throw new Error('Failed to generate question');
     }
-  }
 
-  return fallbackQuestions;
+    return await response.json();
+  } catch (error) {
+    console.error('Error generating question:', error);
+    throw error;
+  }
 }
 
 interface DynamicAssessmentProps {
@@ -201,21 +84,41 @@ const DynamicAssessment: React.FC<DynamicAssessmentProps> = ({ userInfo }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
+  const [loadingNextQuestion, setLoadingNextQuestion] = useState(false);
 
-  useEffect(() => {
-    loadQuestions();
-  }, []);
+  const TOTAL_QUESTIONS = 10;
 
-  const loadQuestions = async (): Promise<void> => {
+  const loadFirstQuestion = useCallback(async () => {
     setLoading(true);
     try {
-      const generatedQuestions = await generateQuestions(userInfo);
-      setQuestions(generatedQuestions);
+      const { question } = await generateQuestion(userInfo, TOTAL_QUESTIONS, []);
+      setQuestions([question]);
     } catch (error) {
-      console.error("Error loading questions:", error);
+      console.error("Error loading first question:", error);
       setQuestions(fallbackQuestions);
     }
     setLoading(false);
+  }, [userInfo]);
+
+  useEffect(() => {
+    loadFirstQuestion();
+  }, [loadFirstQuestion]);
+
+  const loadNextQuestion = async () => {
+    if (questions.length >= TOTAL_QUESTIONS) return;
+    
+    setLoadingNextQuestion(true);
+    try {
+      const { question } = await generateQuestion(
+        userInfo,
+        TOTAL_QUESTIONS,
+        questions
+      );
+      setQuestions(prev => [...prev, question]);
+    } catch (error) {
+      console.error("Error loading next question:", error);
+    }
+    setLoadingNextQuestion(false);
   };
 
   const handleAnswer = (questionId: number, answer: string): void => {
@@ -225,10 +128,11 @@ const DynamicAssessment: React.FC<DynamicAssessmentProps> = ({ userInfo }) => {
     }));
   };
 
-  const handleNext = (): void => {
-    if (currentStep < questions.length - 1) {
-      setCurrentStep(prev => prev + 1);
+  const handleNext = async (): Promise<void> => {
+    if (currentStep === questions.length - 1 && questions.length < TOTAL_QUESTIONS) {
+      await loadNextQuestion();
     }
+    setCurrentStep(prev => prev + 1);
   };
 
   const handlePrevious = (): void => {
@@ -239,8 +143,9 @@ const DynamicAssessment: React.FC<DynamicAssessmentProps> = ({ userInfo }) => {
 
   const handleRegenerate = (): void => {
     setAnswers({});
+    setQuestions([]);
     setCurrentStep(0);
-    loadQuestions();
+    loadFirstQuestion();
   };
 
   const handleSubmit = async () => {
@@ -270,13 +175,13 @@ const DynamicAssessment: React.FC<DynamicAssessmentProps> = ({ userInfo }) => {
   };
 
   const currentQuestion = questions[currentStep];
-  const progress = (currentStep / questions.length) * 100;
+  const progress = (currentStep / TOTAL_QUESTIONS) * 100;
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
         <Loader2 className="w-8 h-8 animate-spin" />
-        <span className="ml-2">Generating questions...</span>
+        <span className="ml-2">Loading first question...</span>
       </div>
     );
   }
@@ -352,7 +257,7 @@ const DynamicAssessment: React.FC<DynamicAssessmentProps> = ({ userInfo }) => {
           <Progress value={progress} className="w-full" />
           <div className="flex justify-between items-center">
             <p className="text-sm text-gray-500">
-              Question {currentStep + 1} of {questions.length}
+              Question {currentStep + 1} of {TOTAL_QUESTIONS}
             </p>
           </div>
         </CardHeader>
@@ -381,7 +286,7 @@ const DynamicAssessment: React.FC<DynamicAssessmentProps> = ({ userInfo }) => {
           >
             Previous
           </Button>
-          {currentStep === questions.length - 1 ? (
+          {currentStep === TOTAL_QUESTIONS - 1 ? (
             <Button 
               onClick={handleSubmit}
               disabled={analyzing}
@@ -399,9 +304,16 @@ const DynamicAssessment: React.FC<DynamicAssessmentProps> = ({ userInfo }) => {
           ) : (
             <Button 
               onClick={handleNext}
-              disabled={currentStep === questions.length - 1}
+              disabled={loadingNextQuestion}
             >
-              Next
+              {loadingNextQuestion ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Loading next...
+                </>
+              ) : (
+                'Next'
+              )}
             </Button>
           )}
         </CardFooter>
