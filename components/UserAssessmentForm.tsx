@@ -70,6 +70,12 @@ const UserAssessmentForm: React.FC<Props> = ({ onSubmit }) => {
             <div className="flex gap-2 mb-2">
               <Input
                 value={techInputValue}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleTechAdd();
+                  }
+                }}
                 onChange={(e) => setTechInputValue(e.target.value)}
                 placeholder="Add technologies (e.g., React, Node.js)"
               />

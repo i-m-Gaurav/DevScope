@@ -396,23 +396,23 @@
 // export default DynamicAssessment;
 
 
-import React from 'react'
-import DynamicAssessment from './DynamicAssessment'
+// import React from 'react'
+// import DynamicAssessment from './DynamicAssessment'
 
-const WebD = () => {
-  const userInfo = {
-    experienceLevel: 'beginner',
-    techStack: ['JavaScript', 'React'],
-    currentKnowledge: 'basic',
-    learningGoals: 'improve problem-solving skills'
-  };
+// const WebD = () => {
+//   const userInfo = {
+//     experienceLevel: 'beginner',
+//     techStack: ['JavaScript', 'React'],
+//     currentKnowledge: 'basic',
+//     learningGoals: 'improve problem-solving skills'
+//   };
 
-  return (
-    <div>
-      <DynamicAssessment userInfo={userInfo} />
-    </div>
-  )
-}
+//   return (
+//     <div>
+//       <DynamicAssessment userInfo={userInfo} />
+//     </div>
+//   )
+// }
 
-export default WebD;
+// export default WebD;
 
