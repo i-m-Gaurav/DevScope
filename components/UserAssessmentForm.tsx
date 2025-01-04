@@ -76,6 +76,7 @@ const UserAssessmentForm: React.FC<Props> = ({ onSubmit }) => {
                     handleTechAdd();
                   }
                 }}
+              
                 onChange={(e) => setTechInputValue(e.target.value)}
                 placeholder="Add technologies (e.g., React, Node.js)"
               />
@@ -97,6 +98,7 @@ const UserAssessmentForm: React.FC<Props> = ({ onSubmit }) => {
             <label className="block text-sm font-medium mb-2">What do you currently know?</label>
             <Textarea
               value={formData.currentKnowledge}
+              required
               onChange={(e) => setFormData({ ...formData, currentKnowledge: e.target.value })}
               placeholder="Briefly describe your current knowledge and skills..."
               className="h-24"
@@ -107,16 +109,18 @@ const UserAssessmentForm: React.FC<Props> = ({ onSubmit }) => {
             <label className="block text-sm font-medium mb-2">What are your learning goals?</label>
             <Textarea
               value={formData.learningGoals}
+              required
               onChange={(e) => setFormData({ ...formData, learningGoals: e.target.value })}
               placeholder="What areas do you want to improve in?"
               className="h-24"
             />
           </div>
+          <CardFooter>
+        <Button type='submit' className="w-full">Start Assessment</Button>
+      </CardFooter>
         </form>
       </CardContent>
-      <CardFooter>
-        <Button onClick={handleSubmit} className="w-full">Start Assessment</Button>
-      </CardFooter>
+     
     </Card>
   );
 };
